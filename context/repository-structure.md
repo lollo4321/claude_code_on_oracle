@@ -14,6 +14,7 @@ repo/
 │       └── technical/
 │           ├── {stream}_assumptions.md
 │           ├── {stream}_install_guide.md
+│           ├── {stream}_lld.md
 │           ├── db/
 │           ├── ords/
 │           └── vbcs/
@@ -36,6 +37,7 @@ Non devono essere modificate salvo esplicita evoluzione del framework.
 - `{stream}/functional/` — source of truth per logica funzionale
 - `{stream}/technical/` — documentazione tecnica dello stream
   - `{stream}_assumptions.md` — assunzioni tecniche adottate durante lo sviluppo
+  - `{stream}_lld.md` — low level design dello stream necessario per avviare lo sviluppo
   - `{stream}_install_guide.md` — guida di installazione e rilascio
   - `db/` — documentazione tabelle e PL/SQL
   - `ords/` — documentazione moduli ed endpoint ORDS
