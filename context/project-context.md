@@ -1,97 +1,45 @@
-# Contesto del progetto
+# Project Context
 
-## Scopo
+## Natura del sistema
 
-Questo file descrive il contesto generale del progetto.
+- **Paradigma dominante:**
+  Sistema orientato a flussi di dati strutturati. Non è CRUD puro: i dati transitano per fasi intermedie prima della persistenza definitiva.
 
-Usalo per:
-- comprendere il tipo di sistema
-- identificare i layer e le responsabilità
-- inquadrare correttamente i requisiti
+- **Fasi del dato:**
+  Acquisizione → Staging → Trasformazione/elaborazione (PL/SQL) → Persistenza definitiva → Esposizione (ORDS → VBCS)
 
----
-
-## Overview
-
-Applicazione enterprise per la gestione di processi applicativi.
-
-Il sistema gestisce:
-- acquisizione dati
-- elaborazione
-- esposizione tramite API
-- interazione utente tramite interfaccia web
+- **Separazioni architetturali critiche:**
+  - Dati grezzi (ETL_SOURCE) vs dati elaborati (STAGING_PAAS) vs dati consolidati
+  - Ogni schema ATP ha responsabilità distinta e non deve essere usato fuori dal suo perimetro
+  - Le UI VBCS non accedono mai direttamente alle tabelle: passano sempre tramite ORDS
 
 ---
 
-## Scope
+## Processi critici
 
-### In scope
-- gestione dati applicativi
-- logiche di processo
-- esposizione servizi
-- interfacce utente
-
-### Out of scope
-- sistemi esterni non controllati dal progetto
-- integrazioni non esplicitamente definite
-- logiche non documentate nelle specifiche funzionali
+- **Elaborazione dati contabili e amministrativi:** i dati transitano per staging, vengono aggregati/normalizzati tramite PL/SQL e persistiti nelle strutture definitive. Integrità e tracciabilità di ogni operazione sono non negoziabili.
+- **Estensioni SaaS tramite VBCS:** le UI custom estendono Oracle Fusion per funzionalità non coperte dallo standard. Le chiamate VBCS verso ATP avvengono esclusivamente tramite moduli ORDS (POST per procedure PL/SQL, GET per select).
 
 ---
 
-## Stack tecnologico
+## Vocabolario del dominio
 
-- Database → Oracle Autonomous Database (ATP)
-- API → ORDS (REST)
-- UI → VBCS
-
----
-
-## Layer logici
-
-Il sistema è organizzato in tre layer principali:
-
-### Data layer
-Responsabile di:
-- persistenza dati
-- logiche PL/SQL
-- integrità e vincoli
-
-### Service layer
-Responsabile di:
-- esposizione API REST
-- orchestrazione delle operazioni
-- gestione input/output
-
-### Presentation layer
-Responsabile di:
-- interfaccia utente
-- interazioni
-- invocazione servizi
+- `Staging`: area intermedia di transito dati prima della persistenza definitiva
+- `ORDS`: Oracle REST Data Services — espone procedure PL/SQL e SELECT dell'ATP come endpoint REST
+- `Module ORDS`: oggetto che espone un endpoint REST sull'ATP; le chiamate VBCS usano solo POST (procedure) o GET (select)
+- `WHO COLUMNS`: colonne di audit standard obbligatorie in ogni tabella
+- `VBCS`: Visual Builder Cloud Service — piattaforma UI per le estensioni PaaS
 
 ---
 
-## Attori e sistemi esterni
+## Perimetro decisionale
 
-### Utenti
-- utenti applicativi che interagiscono tramite UI
+**Il sistema fa:**
+- Staging, trasformazione e consolidamento di dati contabili e amministrativi su ATP
+- Esposizione di servizi REST tramite ORDS verso VBCS
+- UI custom su VBCS per funzionalità non coperte dallo standard Oracle Fusion
 
-### Sistemi esterni
-- sistemi che consumano o forniscono dati tramite API (se presenti)
-
----
-
-## Tipologie di flussi
-
-### Flussi utente
-- interazione UI → API → database → risposta UI
-
-### Flussi di servizio
-- chiamate API → elaborazione → accesso dati → risposta
-
----
-
-## Note
-
-- Il comportamento funzionale è definito nelle specifiche funzionali dello stream
-- Le scelte implementative sono descritte nella documentazione tecnica
-- Se un requisito non è chiaro, esplicitare le assunzioni
+**Il sistema NON fa:**
+- Le UI VBCS non accedono direttamente alle tabelle ATP — sempre e solo tramite ORDS
+- VBCS non usa APEX — il look&feel standard è Redwood
+- Su grandi volumi di dati non si usano servizi ORDS: si preferisce una vista con condizioni di WHERE
