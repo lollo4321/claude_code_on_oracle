@@ -67,13 +67,22 @@ Per ogni modulo elenca:
 |-------------|-----------|--------|
 
 **Endpoint**
-| Modulo | Template | Metodo | Procedura/Select | Input | Output | Descrizione |
-|--------|----------|--------|-----------------|-------|--------|-------------|
+| Modulo | Template | Metodo | Handler Name | Tipo Source | Procedura/Select | Input | Output | Descrizione |
+|--------|----------|--------|--------------|-------------|-----------------|-------|--------|-------------|
 
-Regole:
-- Metodo: solo POST (procedure PL/SQL) o GET (select)
-- Input e Output in formato sintetico — solo nome e tipo dei parametri principali
-- La descrizione deve chiarire cosa fa l'endpoint dal punto di vista del processo
+Regole di compilazione:
+- **Metodo**: solo GET o POST
+- **Handler Name**: nome univoco dell'handler nel formato camelCase
+- **Tipo Source**: uno tra:
+  - `collection_query` — SELECT che ritorna JSON array, usato per liste
+  - `item_query` — SELECT che ritorna singola riga JSON, usato per dettaglio
+  - `plsql/block` — blocco PL/SQL anonimo, usato per INSERT/UPDATE/transizioni
+  - `media` — handler BLOB, usato per upload/download allegati
+- **Procedura/Select**: nome della procedura PL/SQL oppure tabella/view interrogata
+- **Input**: parametri principali con sorgente esplicita —
+  `path:` per path param, `query:` per query param, `body:` per JSON body
+- **Output**: struttura JSON di risposta in formato sintetico
+- **Descrizione**: cosa fa l'endpoint dal punto di vista del processo
 
 ---
 
